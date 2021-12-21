@@ -1,10 +1,11 @@
 plugins {
+    id("org.jetbrains.kotlin.jvm")
     id("java-library")
-    id("kotlin")
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+
 }
 
 java {

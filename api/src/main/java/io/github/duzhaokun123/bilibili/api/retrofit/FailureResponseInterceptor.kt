@@ -1,0 +1,61 @@
+package io.github.duzhaokun123.bilibili.api.retrofit
+
+import com.github.salomonbrys.kotson.fromJson
+import io.github.duzhaokun123.bilibili.api.gson
+import io.github.duzhaokun123.bilibili.api.jsonParser
+import okhttp3.Interceptor
+import okhttp3.Response
+
+/**
+ * 如果服务器返回的 code 不为 0 则抛出异常
+ */
+object FailureResponseInterceptor : Interceptor {
+    const val API_ERROR = "Fatal: API error"
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val response = chain.proceed(chain.request())
+        val body = response.body
+        if (!response.isSuccessful || body == null || body.contentLength() == 0L) return response
+
+        //获取字符集
+        val contentType = body.contentType()
+        val charset = if (contentType == null) {
+            Charsets.UTF_8
+        } else {
+            contentType.charset(Charsets.UTF_8)!!
+        }
+
+        //拷贝流
+        var inputStreamReader = body.source().also {
+            it.request(Long.MAX_VALUE)
+        }.buffer.clone().inputStream().reader(charset)
+
+        //处理 Fatal: API error
+        val c = CharArray(API_ERROR.length)
+        inputStreamReader.read(c, 0, c.size)
+        if (String(c) == API_ERROR) {
+            throw BilibiliApiException(CommonResponse(null, API_ERROR, null, response.sentRequestAtMillis, null, null))
+        }
+        inputStreamReader = body.source().also {
+            it.request(Long.MAX_VALUE)
+        }.buffer.clone().inputStream().reader(charset)
+
+        //读取其内容
+        val jsonObject = try {
+            jsonParser.parse(inputStreamReader).asJsonObject
+        } catch (exception: Exception) {
+            //如果返回内容解析失败, 说明它不是一个合法的 json
+            //如果在拦截器抛出 MalformedJsonException 会导致 Retrofit 的异步请求一直卡着直到超时
+            return response
+        } finally {
+            inputStreamReader.close()
+        }
+
+        //判断 code 是否为 0
+        if (jsonObject["code"]?.asInt != 0) {
+            throw BilibiliApiException(gson.fromJson(jsonObject))
+        }
+
+        return response
+    }
+}

@@ -1,5 +1,7 @@
 package com.duzhaokun123.bilibilihd2.utils
 
+import com.hiczp.bilibili.api.passport.model.LoginResponse
+import io.github.duzhaokun123.bilibili.api.Cookies
 import kotlin.math.pow
 
 /*
@@ -45,3 +47,5 @@ fun Long.toBvid(): String {
     }
     return String(re)
 }
+
+fun Cookies.Companion.fromLoginResponse(loginResponse: LoginResponse?) = loginResponse?.run { Cookies(dedeUserID!!, dedeUserIDCkMd5!!, sessdata!!, biliJct!!, sid!!, loginResponse.expires.toString())}

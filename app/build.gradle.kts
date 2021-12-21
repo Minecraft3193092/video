@@ -148,6 +148,8 @@ dependencies {
     implementation(project(":grpc"))
 
     implementation("androidx.multidex:multidex:2.0.1")
+
+    implementation(project(":api"))
 }
 
 afterEvaluate {

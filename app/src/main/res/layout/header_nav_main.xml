@@ -37,9 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_name"
         android:layout_alignStart="@id/tv_name"
-        android:layout_marginTop="5dp"
-        android:text="B币: --"
-        tools:ignore="HardcodedText" />
+        android:layout_marginTop="5dp" />
 
     <TextView
         android:id="@+id/tv_coins"

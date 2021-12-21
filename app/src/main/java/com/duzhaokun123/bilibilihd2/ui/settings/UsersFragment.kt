@@ -14,6 +14,7 @@ import com.duzhaokun123.bilibilihd2.ui.login.LoginActivity
 import com.duzhaokun123.bilibilihd2.utils.*
 import com.duzhaokun123.generated.Settings
 import com.github.salomonbrys.kotson.fromJson
+import io.github.duzhaokun123.bilibili.api.BilibiliService
 
 @Suppress("UNUSED")
 class UsersFragment : BaseFragment<FragmentUsersBinding>(R.layout.fragment_users) {
@@ -121,23 +122,23 @@ class UsersFragment : BaseFragment<FragmentUsersBinding>(R.layout.fragment_users
     }
 
     private fun reloadSelectedUser() {
-        if (bilibiliClient.loginResponse != null) {
-            val loginResponse = bilibiliClient.loginResponse!!
+        if (BilibiliService.loggedIn) {
+            val cookies = BilibiliService.cookies!!
             baseBinding.model =
                 UserModel(
                     "Loading...",
-                    loginResponse.userId,
+                    cookies.uid,
                     null,
-                    "UID: ${loginResponse.userId}\n过期于: ${DateFormat.format1.format(loginResponse.expires * 1000)}"
+                    "UID: ${cookies.uid}\n过期于: ${cookies.expires}"
                 )
             runIOCatchingResultRunMain(
-                context, { bilibiliClient.appAPI.myInfo().await() })
-            { myInfo ->
+                context, { BilibiliService.userApi.nav().await() })
+            { nav ->
                 baseBinding.model = UserModel(
-                    myInfo.data.name,
-                    loginResponse.userId,
-                    myInfo.data.face,
-                    "UID: ${loginResponse.userId}\n过期于: ${DateFormat.format1.format(loginResponse.expires * 1000)}"
+                    nav.data.uname,
+                    cookies.uid,
+                    nav.data.face,
+                    "UID: ${cookies.uid}\n过期于: ${cookies.expires}"
                 )
             }
         } else

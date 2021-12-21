@@ -11,6 +11,9 @@ import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.hiczp.bilibili.api.BilibiliClient
 import com.hiczp.bilibili.api.BilibiliClientProperties
+import io.github.duzhaokun123.bilibili.api.BilibiliService
+import io.github.duzhaokun123.bilibili.api.Cookies
+import com.duzhaokun123.bilibilihd2.utils.fromLoginResponse
 
 @Suppress("UNUSED")
 class Application : android.app.Application() {
@@ -58,6 +61,7 @@ class Application : android.app.Application() {
         bilibiliClient.loginResponse = UsersMap[uid]
         BrowserUtil.syncLoginResponseCookie()
         grpcClidet.rebuildChannel()
+        BilibiliService.cookies = Cookies.fromLoginResponse(bilibiliClient.loginResponse)
     }
 
     fun reinitUiMod(uiMod: Int = Settings.uiMod) {

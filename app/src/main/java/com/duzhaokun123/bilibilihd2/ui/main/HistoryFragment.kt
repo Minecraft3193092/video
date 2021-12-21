@@ -2,6 +2,7 @@ package com.duzhaokun123.bilibilihd2.ui.main
 
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.WindowInsetsCompat
@@ -14,7 +15,9 @@ import com.duzhaokun123.bilibilihd2.databinding.ItemHistoryCardBinding
 import com.duzhaokun123.bilibilihd2.model.HistoryCardModel
 import com.duzhaokun123.bilibilihd2.utils.*
 import com.duzhaokun123.generated.Settings
-import com.hiczp.bilibili.api.app.model.History
+
+import io.github.duzhaokun123.bilibili.api.BilibiliService
+import io.github.duzhaokun123.bilibili.api.api.model.History
 
 class HistoryFragment :
     BaseSimpleCardGridSRRVFragment<ItemHistoryCardBinding, HistoryCardModel, HistoryFragment.HistoryModel>(
@@ -23,21 +26,18 @@ class HistoryFragment :
         HistoryModel::class
     ) {
     class HistoryModel : BaseSimpleCardGridSRRVFragment.BaseModel<HistoryCardModel>() {
-        val max = MutableLiveData<Long>(0)
-        val tabs = MutableLiveData<List<History.Data.Tab>>(emptyList())
-        val selectedTab = MutableLiveData("all")
+        val viewAt = MutableLiveData(0L)
     }
 
     override suspend fun onRefreshIO(): List<HistoryCardModel>? {
         return runCatching {
             HistoryCardModel.parse(
-                bilibiliClient.appAPI.history(business = baseModel.selectedTab.value!!).await()
+                BilibiliService.apiApi.getHistory().await()
                     .also {
-                        if (it.data.cursor != null)
-                            baseModel.max.postValue(it.data.cursor!!.max)
-                        else
+                        if (it.data.cursor != null) {
+                            baseModel.viewAt.postValue(it.data.cursor.viewAt)
+                        }else
                             setNoMoreData(true)
-                        baseModel.tabs.postValue(it.data.tab)
                     })
         }.also { if (it.isFailure) TipUtil.showTip(context, it.exceptionOrNull()!!.message) }
             .getOrNull()
@@ -46,16 +46,17 @@ class HistoryFragment :
     override suspend fun onLoadMorIO(): List<HistoryCardModel>? {
         return runCatching {
             HistoryCardModel.parse(
-                bilibiliClient.appAPI.history(
-                    business = baseModel.selectedTab.value!!, max = baseModel.max.value!!
+                BilibiliService.apiApi.getHistory(
+                    viewAt = baseModel.viewAt.value!!
                 ).await().also {
-                    if (it.data.cursor != null)
-                        baseModel.max.postValue(it.data.cursor!!.max)
-                    else
+                    if (it.data.cursor != null) {
+                        baseModel.viewAt.postValue(it.data.cursor.viewAt)
+                    } else
                         setNoMoreData(true)
                 })
-        }.also { if (it.isFailure) TipUtil.showTip(context, it.exceptionOrNull()!!.message) }
-            .getOrNull()
+        }.onFailure {
+            TipUtil.showTip(context, it.message)
+        }.getOrNull()
     }
 
     override fun initItemView(
@@ -92,25 +93,5 @@ class HistoryFragment :
             }
             baseBinding.srl.updatePadding(bottom = it.bottom)
         }
-    }
-
-    override fun initData() {
-        super.initData()
-        baseModel.tabs.observe(this) { activity?.invalidateOptionsMenu() }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        baseModel.tabs.value!!.forEachIndexed { i, tab ->
-            menu.add(1, i, i, tab.name).apply {
-                isChecked = tab.business == baseModel.selectedTab.value
-                setOnMenuItemClickListener {
-                    isChecked = true
-                    baseModel.selectedTab.value = tab.business
-                    srl.autoRefresh()
-                    true
-                }
-            }
-        }
-        menu.setGroupCheckable(1, true, true)
     }
 }

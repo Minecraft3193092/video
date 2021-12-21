@@ -20,6 +20,7 @@ import com.duzhaokun123.bilibilihd2.ui.TestActivity
 import com.duzhaokun123.bilibilihd2.ui.settings.SettingsActivity
 import com.duzhaokun123.bilibilihd2.utils.*
 import com.duzhaokun123.bilibilihd2.utils.ImageViewUtil.setBiliLevel
+import io.github.duzhaokun123.bilibili.api.BilibiliService
 
 class MainActivity : BaseActivity<ActivityMainBinding>(
     R.layout.activity_main,
@@ -103,18 +104,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>(
     @SuppressLint("SetTextI18n")
     fun reloadMyInfo() {
         if (bilibiliClient.isLogin)
-            runIOCatchingResultRunMain(this, { bilibiliClient.appAPI.myInfo().await() }) { myInfo ->
+            runIOCatchingResultRunMain(this, { BilibiliService.userApi.nav().await()}) { nav ->
                 headerView.findViewById<TextView>(R.id.tv_name)?.apply {
-                    text = myInfo.data.name
-                    setTextColor(getColorCompat(if (myInfo.data.vip.status == 0) R.color.textColor else R.color.biliPink))
+                    text = nav.data.uname
+                    setTextColor(getColorCompat(if (nav.data.vipStatus == 0) R.color.textColor else R.color.biliPink))
                 }
-                headerView.findViewById<TextView>(R.id.tv_coins)?.text =
-                    "硬币: ${myInfo.data.coins}"
-                headerView.findViewById<ImageView>(R.id.iv_level)?.setBiliLevel(myInfo.data.level)
-                glideSafeLoadInto(myInfo.data.face, headerView.findViewById(R.id.civ_face))
+                headerView.findViewById<TextView>(R.id.tv_bBi)?.text =
+                    "B币: ${nav.data.wallet.bcoinBalance}"
+                runIOCatchingResultRunMain(this, { BilibiliService.accountApi.getCoin().await() }) {
+                    headerView.findViewById<TextView>(R.id.tv_coins)?.text =
+                        "硬币: ${it.data.money}"
+                }
+
+                headerView.findViewById<ImageView>(R.id.iv_level)?.setBiliLevel(nav.data.levelInfo.currentLevel)
+                glideSafeLoadInto(nav.data.face, headerView.findViewById(R.id.civ_face))
             }
         else {
             headerView.findViewById<TextView>(R.id.tv_name)?.text = "未登录"
+            headerView.findViewById<TextView>(R.id.tv_bBi)?.text = "B币: --"
             headerView.findViewById<TextView>(R.id.tv_coins)?.text = "硬币: --"
             headerView.findViewById<ImageView>(R.id.iv_level)?.setBiliLevel(0)
             headerView.findViewById<ImageView>(R.id.civ_face).setImageDrawable(null)
