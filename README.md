@@ -11,8 +11,10 @@
 ## 下载
 [GitHub Actions](https://github.com/duzhaokun123/BilibiliHD2/actions/workflows/android.yaml) (需登陆 GitHub)
 
-蓝奏云
-- 0.1 https://wwe.lanzoui.com/b01ugzj5c 密码:233
+google drive
+- 0.1  密码:233
+- mega
+- 0.1  密码:233
 
 ## 将支持的功能
 
@@ -31,7 +33,7 @@
         - [ ] 精准空降
         - [ ] 屏幕滑动进度控制
         - [ ] 远程播放 (仅在本机通过模拟辅助显示设备测试)
-        - [ ] 4K (没大会员没法试)
+        - [x] 4K (没大会员没法试)
     - [ ] 弹幕
         - [x] 显示普通弹幕
         - [x] 显示高级弹幕 (可能有部分无法显示)
