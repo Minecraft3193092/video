@@ -1,4 +1,4 @@
-# Bilibili HD 2 (WIP)
+# minecraft3193092 video
 
 [![GitHub license](https://img.shields.io/github/license/duzhaokun123/BilibiliHD2?style=flat-square)](https://github.com/duzhaokun123/BilibiliHD2/blob/main/LICENSE)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/duzhaokun123/BilibiliHD2/Android%20CI?style=flat-square&logo=github)](https://github.com/duzhaokun123/BilibiliHD2/actions/workflows/android.yaml)
